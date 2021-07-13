@@ -3,9 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "npm run serve:client & npm run serve:api",
-    "serve:client": "vue-cli-service serve",
-    "serve:api": "node api/index.js",
+    "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
