@@ -4,7 +4,7 @@ module.exports = {
     node: true,
   },
   plugins: [
-    "@typescript-eslint"
+    '@typescript-eslint',
   ],
   extends: [
     'plugin:vue/essential',
@@ -13,7 +13,7 @@ module.exports = {
   ],
   parserOptions: {
     ecmaVersion: 2020,
-    parser: "@typescript-eslint/parser",
+    parser: '@typescript-eslint/parser',
   },
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
@@ -21,6 +21,8 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     'class-methods-use-this': 'off',
     '@typescript-eslint/no-empty-function': 'off',
-    'no-unused-expressions': 'off'
+    'no-unused-expressions': 'off',
+    '@typescript-eslint/no-var-requires': 'off',
+    'no-empty': 'off',
   },
 };

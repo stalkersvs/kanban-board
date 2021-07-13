@@ -34,12 +34,18 @@ export default class ComponentBoard extends Vue {
 
   @Prop() private readonly !: boolean;
 
+  /**
+   * Reset inserted value
+   */
   reset() {
     this.edit = false;
 
     this.selectedValue = this.value;
   }
 
+  /**
+   * Toggle input for editing via v-model
+   */
   toggleEdit() {
     if (this.edit) {
       this.$emit('input', this.selectedValue);
@@ -50,6 +56,8 @@ export default class ComponentBoard extends Vue {
 
   constructor() {
     super();
+
+    console.log('TEST', this.value);
 
     this.selectedValue = this.value;
   }
@@ -82,6 +90,13 @@ export default class ComponentBoard extends Vue {
     border-top-right-radius: 5px;
 
     overflow:hidden;
+
+    height: fit-content;
+
+    @media (max-width: 520px) {
+      margin-right: 0;
+      margin-bottom: 1em;
+    }
 
     @for $i from 0 to $num-colors {
       &:nth-of-type(#{$i}) {

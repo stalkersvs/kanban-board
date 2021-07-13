@@ -1,25 +1,22 @@
 <template>
   <section class="home" >
-    <div class='table' v-if='data'>
-      <section class="table" v-if='data'>
-        <template v-for='(item_b,idx_b) in data.boards'>
+    <div class='table' v-if='board.id'>
+      <section class="table" >
           <ComponentBoard
-                  v-if='idx_b === parseInt($route.params.id, 10)'
-                  v-model='item_b.name'
-                  :key='idx_b'
+                v-model='board.name'
           >
             <template #remove>
-             <button class='icon' @click='removeBoard(idx_b)'>
+             <button class='icon' @click='removeBoard()'>
                <font-awesome-icon icon="trash-alt" />
              </button>
             </template>
             <template #lists>
-              <template v-for='(item_l,idx_l) in item_b.lists'>
+              <template v-for='(item_l,idx_l) in board.lists'>
                 <ComponentList v-model='item_l.name'
-                               :key='idx_l+idx_b'
+                               :key='idx_l'
                               >
                   <template #remove>
-                    <button class='icon' @click='removeList(idx_b, idx_l)'>
+                    <button class='icon' @click='removeList(idx_l)'>
                       <font-awesome-icon icon="trash-alt" />
                     </button>
                   </template>
@@ -27,34 +24,33 @@
                     <template v-for='(item_i,idx_i) in item_l.items'>
                       <ComponentItem
                               v-model='item_i.name'
-                              :key='idx_i+idx_l+idx_b'
+                              :key='idx_i+idx_l'
                               >
                         <template #remove>
-                          <button class='icon' @click='removeItem(idx_b, idx_l, idx_i)'>
+                          <button class='icon' @click='removeItem(idx_l, idx_i)'>
                             <font-awesome-icon icon="trash-alt" />
                           </button>
                         </template>
                       </ComponentItem>
                     </template>
-                    <button  class='btn newItem' @click='addItem(idx_b, idx_l)'>
+                    <button  class='btn newItem' @click='addItem( idx_l)'>
                       <font-awesome-icon icon="plus" />
                     </button>
                   </template>
                 </ComponentList>
               </template>
-              <button  class='btn newList' @click='addList(idx_b)'>
+              <button  class='btn newList' @click='addList()'>
                 <font-awesome-icon icon="plus" />
               </button>
             </template>
           </ComponentBoard>
-        </template>
       </section>
     </div>
   </section>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Watch } from 'vue-property-decorator';
 import ComponentList from '@/components/ComponentList.vue';
 import ComponentBoard from '@/components/ComponentBoard.vue';
 import ComponentItem from '@/components/ComponentItem.vue';
@@ -62,6 +58,7 @@ import {
   Board, Item, Kanban, List,
 } from '@/api/api';
 import { Sync } from 'vuex-pathify';
+import { KanbanApp } from '@/utils/interfaces';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { v4: uuidv4 } = require('uuid');
@@ -76,66 +73,86 @@ const { v4: uuidv4 } = require('uuid');
 export default class Detail extends Vue {
   @Sync('data') private data!: Kanban;
 
-  removeBoard(boardId: number) {
-    if (this.data) {
-      this.data.boards.splice(boardId, 1);
+  private board: Board = {} as Board;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  parent: KanbanApp = this.$parent as any;
+
+  async created() {
+    this.board = await this.$api.getBoard(this.$route.params.id);
+  }
+
+  /**
+   * Watch board for changes and update in database
+   *
+   * @param {Board} val
+   */
+  @Watch('board', { deep: true })
+  watchBoard(val: Board) {
+    this.$api.updateBoard(val.id, val);
+  }
+
+  /**
+   * Remove board and return to home
+   */
+  async removeBoard() {
+    this.parent.setLoadingOn();
+
+    const resp: boolean = await this.$api.deleteBoard(this.board.id);
+
+    this.parent.setLoadingOff();
+
+    if (resp) {
+      this.$router.push({ name: 'Home' });
     }
   }
 
-  removeList(boardId: number, listId: number) {
-    if (this.data) {
-      this.data.boards[boardId].lists.splice(listId, 1);
-    }
+  /**
+   * Remove list from board list array by index
+   *
+   * @param {listId: number} listId
+   */
+  removeList(listId: number) {
+    this.board.lists.splice(listId, 1);
   }
 
-  removeItem(boardId:number, listId: number, itemId: number) {
-    if (this.data) {
-      this.data.boards[boardId].lists[listId].items.splice(itemId, 1);
-    }
+  /**
+   * Remove item from list from board list array by index
+   *
+   * @param { number} listId
+   * @param { number} itemId
+   */
+  removeItem(listId: number, itemId: number) {
+    this.board.lists[listId].items.splice(itemId, 1);
   }
 
-  addList(boardId: number) {
+  /**
+   * Generate new list and create
+   */
+  addList() {
     const list: List = {
       name: 'Nový list',
       id: uuidv4(),
       items: [],
     };
 
-    if (this.data) {
-      const board: Board = this.data.boards[boardId];
-
-      console.log(board);
-
-      board.lists.push(list);
-    }
+    this.board.lists.push(list);
   }
 
-  addItem(boardId: number, listId: number) {
-    console.log(this.data?.boards[boardId].lists[listId]);
-
+  /**
+   * Add new item to list by id in board list array
+   *
+   * @param {number} listId
+   */
+  addItem(listId: number) {
     const item: Item = {
       name: 'Nový item',
       id: uuidv4(),
     };
 
-    if (this.data) {
-      const board: Board = this.data.boards[boardId];
+    const list: List = this.board.lists[listId];
 
-      const list: List = board.lists[listId];
-
-      list.items.push(item);
-    }
-  }
-
-  selectBoard(boardId: number) {
-    console.log(boardId);
-
-    this.$router.push({
-      name: 'Home',
-      params: {
-        id: boardId,
-      } as any,
-    });
+    list.items.push(item);
   }
 }
 </script>

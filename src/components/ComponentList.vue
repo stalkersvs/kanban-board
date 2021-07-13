@@ -33,12 +33,18 @@ export default class ComponentList extends Vue {
 
   @Prop() private readonly !: boolean;
 
+  /**
+   * Reset inserted value
+   */
   reset() {
     this.edit = false;
 
     this.selectedValue = this.value;
   }
 
+  /**
+   * Toggle input for editing via v-model
+   */
   toggleEdit() {
     if (this.edit) {
       this.$emit('input', this.selectedValue);

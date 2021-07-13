@@ -5,7 +5,7 @@ Vue.use(VueRouter);
 
 const routes: Array<RouteConfig> = [
   {
-    path: '/',
+    path: '/:anchor?',
     name: 'Home',
     component: () => import(/* webpackChunkName: "PageHome" */ '../pages/Home.vue'),
   },
