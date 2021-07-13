@@ -5,9 +5,14 @@ Vue.use(VueRouter);
 
 const routes: Array<RouteConfig> = [
   {
-    path: '/:id?',
+    path: '/',
     name: 'Home',
-    component: () => import(/* webpackChunkName: "pageHome" */ '../pages/Home.vue'),
+    component: () => import(/* webpackChunkName: "PageHome" */ '../pages/Home.vue'),
+  },
+  {
+    path: '/detail/:id',
+    name: 'Detail',
+    component: () => import(/* webpackChunkName: "PageDetail" */ '../pages/Detail.vue'),
   },
 ];
 

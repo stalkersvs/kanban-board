@@ -1,10 +1,14 @@
 <template>
   <div :id='id' class="item">
-    <input v-if='edit' type='text'>
-    <p v-else v-html='name'></p>
-    <div class='controls'>
-      <button @click='toggleEdit'>
-        <slot name='edit'></slot>
+    <input v-if='edit' v-model='selectedValue' type='text'>
+    <p v-else v-html='value'></p>
+    <div class='controls' v-if='!readonly'>
+      <button @click='toggleEdit' >
+        <font-awesome-icon icon="edit" v-if='!edit' />
+        <font-awesome-icon icon="check" v-else />
+      </button>
+      <button @click='reset' v-if='edit'>
+        <font-awesome-icon icon="times" />
       </button>
       <slot name='remove'></slot>
     </div>
@@ -16,14 +20,34 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 
 @Component
 export default class ComponentItem extends Vue {
+  private selectedValue = '';
+
+  private edit = false;
+
   @Prop() private id!: string;
 
-  @Prop() private name!: string;
+  @Prop() private value!: string;
 
-  @Prop({ default: true }) private edit!: boolean;
+  @Prop() private readonly !: boolean;
+
+  reset() {
+    this.edit = false;
+
+    this.selectedValue = this.value;
+  }
 
   toggleEdit() {
+    if (this.edit) {
+      this.$emit('input', this.selectedValue);
+    }
 
+    this.edit = !this.edit;
+  }
+
+  constructor() {
+    super();
+
+    this.selectedValue = this.value;
   }
 }
 </script>
@@ -35,7 +59,7 @@ export default class ComponentItem extends Vue {
 
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
 
     p{
       margin: 0;
@@ -49,6 +73,32 @@ export default class ComponentItem extends Vue {
 
     .controls{
       display: flex;
+      align-items: flex-start;
+
+      margin-left: 1em;
+      flex-shrink: 0;
+    }
+
+    input{
+      border-radius: 5px;
+      border: 1px solid black;
+      padding: 0 0.5em;
+      width: 100%;
+    }
+
+    button{
+
+      border-radius: 5px;
+      transition: 0.25s;
+      cursor: pointer;
+
+      border:2px solid white;
+      background: #e1e3e9;
+
+      &:hover{
+        border-color: black;
+      }
+
     }
   }
 </style>

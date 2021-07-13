@@ -8,11 +8,19 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import Header from '@/parts/Header.vue';
+import { Sync } from 'vuex-pathify';
+import { Kanban } from '@/api/api';
 
   @Component({
     components: { Header },
   })
-export default class App extends Vue {}
+export default class App extends Vue {
+    @Sync('data') private data!: Kanban;
+
+    async created() {
+      this.data = await this.$api.getKanban();
+    }
+}
 </script>
 
 <style lang="scss" >

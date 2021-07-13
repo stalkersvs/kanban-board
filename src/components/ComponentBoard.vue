@@ -1,16 +1,21 @@
 <template>
   <div :id='id' class="board">
     <div class='header'>
-      <input v-if='edit' type='text'>
-      <h2 v-else v-html='name'></h2>
-      <div class='controls'>
-        <button @click='toggleEdit'>
-          <slot name='edit'></slot>
+      <input v-if='edit' v-model='selectedValue' type='text'>
+      <h2 v-else v-html='value'></h2>
+      <div class='controls' v-if='!readonly'>
+        <button @click='toggleEdit' >
+          <font-awesome-icon icon="edit" v-if='!edit' />
+          <font-awesome-icon icon="check" v-else />
+        </button>
+        <button @click='reset' v-if='edit'>
+          <font-awesome-icon icon="times" />
         </button>
         <slot name='remove'></slot>
       </div>
     </div>
     <slot name='lists'></slot>
+    <slot name='edit'></slot>
   </div>
 </template>
 
@@ -19,14 +24,34 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 
 @Component
 export default class ComponentBoard extends Vue {
+  private selectedValue = '';
+
+  private edit = false;
+
   @Prop() private id!: string;
 
-  @Prop() private name!: string;
+  @Prop() private value!: string;
 
-  @Prop({ default: true }) private edit!: boolean;
+  @Prop() private readonly !: boolean;
+
+  reset() {
+    this.edit = false;
+
+    this.selectedValue = this.value;
+  }
 
   toggleEdit() {
+    if (this.edit) {
+      this.$emit('input', this.selectedValue);
+    }
 
+    this.edit = !this.edit;
+  }
+
+  constructor() {
+    super();
+
+    this.selectedValue = this.value;
   }
 }
 </script>
@@ -77,18 +102,47 @@ export default class ComponentBoard extends Vue {
 
     .controls{
       display: flex;
+      align-items: flex-start;
+
+      margin-left: 1em;
+      flex-shrink: 0;
     }
 
     .header{
+      margin-top: 5px;
       display: flex;
       justify-content: space-between;
       flex-direction: row;
+
+      padding: 0 0 1em;
     }
 
     h2{
       color: #9a9cae;
       font-size: 18px;
       font-weight: 500;
+
+       margin: 0;
+    }
+
+    input{
+      border-radius: 5px;
+      border: 1px solid black;
+      padding: 0 0.5em;
+      width: 100%;
+    }
+
+    button{
+      border-radius: 5px;
+      transition: 0.25s;
+      cursor: pointer;
+
+      border:2px solid #f4f4f5;
+      background: #e5e9ef;
+
+      &:hover{
+        border-color: black;
+      }
     }
   }
 </style>
