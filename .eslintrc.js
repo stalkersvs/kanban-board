@@ -24,5 +24,6 @@ module.exports = {
     'no-unused-expressions': 'off',
     '@typescript-eslint/no-var-requires': 'off',
     'no-empty': 'off',
+    'linebreak-style': 'off'
   },
 };
